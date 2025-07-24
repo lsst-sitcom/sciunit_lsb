@@ -1,6 +1,0 @@
-Metadata-Version: 2.4
-Name: rayven
-Version: 1.0.0
-Summary: Package for optical ghost modeling
-Author-email: Aashay Pai <pai@uchicago.edu>
-Requires-Python: >=3.8
