@@ -1,0 +1,13 @@
+[project]
+name = "rayven"
+version = "1.0.0"
+description = "Package for optical ghost modeling"
+authors = [
+  { name = "Aashay Pai", email = "pai@uchicago.edu" }
+]
+#readme = "README.md"
+requires-python = ">=3.8"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["rayven", "rayven_utils"]
