@@ -5,7 +5,7 @@ import numpy as np
 import astropy.units as u
 from astropy.table import Table
 
-REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DATA_DIR = os.path.join(REPO_DIR, 'data', 'throughputs')
 
 class Reflectance:

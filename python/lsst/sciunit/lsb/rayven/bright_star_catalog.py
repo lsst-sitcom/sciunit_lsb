@@ -7,8 +7,11 @@ from astropy.table import Table, QTable
 
 from rayven_utils.DES_to_LSST import des_to_lsst
 
-REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-CAT_PATH = os.path.join(REPO_DIR, 'data', 'ybsc_v5.fits')
+from astroquery.vizier import Vizier
+Vizier.ROW_LIMIT = -1
+
+# REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+# CAT_PATH = os.path.join(REPO_DIR, 'data', 'ybsc_v5.fits')
 
 class BrightStarCatalog:
 
@@ -59,13 +62,23 @@ class BrightStarCatalog:
                 table[column].unit = unit
 
     def get_ybsc(self):
-        ybsc = fits.open(self._path)
-        ybsc = ybsc[1].data
+        # ybsc = fits.open(self._path)
+        # ybsc = ybsc[1].data
+        result = Vizier.get_catalogs("V/50")
+        ybsc = result[0]
+        
         return ybsc
 
     def filter_ybsc(self):
-        mask = np.isfinite(self.ybsc['coord_ra']) & np.isfinite(self.ybsc['coord_dec'])
+        # mask = np.isfinite(self.ybsc['coord_ra']) & np.isfinite(self.ybsc['coord_dec'])
+        # self.ybsc = self.ybsc[mask]
+        mask = (self.ybsc['RAJ2000'] != '') & (self.ybs['DEJ2000'] != '') 
         self.ybsc = self.ybsc[mask]
+        coords = SkyCoord(ra=self.ybsc['RAJ2000'], dec=self.ybsc['DEJ2000'], unit=(u.hourangle, u.deg))
+        
+        self.ybsc['coord_ra'] = coords.ra.deg
+        self.ybsc['coord_dec'] = coords.dec.deg
+
 
     def get_bright_stars(self, flux_threshold=1e7):
         boresight = SkyCoord(ra=[self.ra]*u.degree, dec=[self.dec]*u.degree)
