@@ -1,7 +1,6 @@
 import os
 
 # import numpy as np
-from lsst.summit.utils import ConsDbClient
 
 
 class ObservationParameters:
@@ -31,6 +30,11 @@ class ObservationParameters:
             raise ValueError("Either visit or all of (ra, dec, band, zeropoint) must be provided.")
 
     def _load_exposure_catalog(self):
+        try:
+            from lsst.summit.utils import ConsDbClient  # type: ignore
+        except ImportError as e:
+            raise ImportError("ConsDbClient requires lsst.summit to be installed.") from e
+
         os.environ["no_proxy"] += ",.consdb"
         query = """
             SELECT
