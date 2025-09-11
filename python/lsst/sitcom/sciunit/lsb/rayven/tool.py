@@ -28,6 +28,8 @@ class GhostTool:
                 band=kwargs.get("band", None),
                 zeropoint=kwargs.get("zeropoint", None),
                 exposure_catalog=kwargs.get("exposure_catalog", None),
+                url=kwargs.get("consdb_url", None),
+                token=kwargs.get("consdb_token", None),
             )
 
         # INITIALIZING DATA PRODUCTS #

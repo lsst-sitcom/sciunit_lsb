@@ -64,11 +64,11 @@ class BrightStarCatalog:
         return ybsc
 
     def filter_ybsc(self):
-        mask_ra = np.isfinite(self.ybsc["coord_ra"])
-        mask_dec = np.isfinite(self.ybsc["coord_dec"])
-        mask = mask_ra & mask_dec
+        # mask_ra = np.isfinite(self.ybsc["RAJ2000"])
+        # mask_dec = np.isfinite(self.ybsc["DEJ2000"])
+        # mask = mask_ra & mask_dec
         # self.ybsc = self.ybsc[mask]
-        mask = (self.ybsc["RAJ2000"] != "") & (self.ybs["DEJ2000"] != "")
+        mask = (self.ybsc["RAJ2000"] != "") & (self.ybsc["DEJ2000"] != "")
         self.ybsc = self.ybsc[mask]
         coords = SkyCoord(ra=self.ybsc["RAJ2000"], dec=self.ybsc["DEJ2000"], unit=(u.hourangle, u.deg))
 

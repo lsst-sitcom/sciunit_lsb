@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 # import sys
 # import astropy.units as u
@@ -7,8 +8,14 @@ from astropy.table import Table
 
 from .constants import LSSTCamConstants
 
-REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../.."))
-DATA_DIR = os.path.join(REPO_DIR, "data", "throughputs")
+REPO_DIR = Path(__file__).resolve()
+while REPO_DIR.name != "python":
+    if REPO_DIR.parent == REPO_DIR:  # reached root, stop
+        raise RuntimeError("Could not find 'python' directory in path")
+    REPO_DIR = REPO_DIR.parent
+
+REPO_DIR = os.path.join(REPO_DIR, "..")
+DATA_DIR = os.path.join(REPO_DIR, "resources", "throughputs")
 
 
 class Reflectance:

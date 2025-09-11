@@ -9,11 +9,13 @@ class ObservationParameters:
         self, visit=None, ra=None, dec=None, band=None, zeropoint=None, exposure_catalog=None, **kwargs
     ):
 
+        self.kwargs = kwargs
+
         if visit is not None:
             self.visit = visit
 
             if exposure_catalog is None:
-                exposure_catalog = self._load_exposure_catalog()
+                exposure_catalog = self._load_exposure_catalog(**kwargs)
 
             self.ra, self.dec, self.band, self.zeropoint = self._load_from_exposure_catalog(
                 visit, exposure_catalog
@@ -29,13 +31,14 @@ class ObservationParameters:
         else:
             raise ValueError("Either visit or all of (ra, dec, band, zeropoint) must be provided.")
 
-    def _load_exposure_catalog(self):
+    def _load_exposure_catalog(self, **kwargs):
         try:
             from lsst.summit.utils import ConsDbClient  # type: ignore
         except ImportError as e:
             raise ImportError("ConsDbClient requires lsst.summit to be installed.") from e
 
         os.environ["no_proxy"] += ",.consdb"
+
         query = """
             SELECT
                 v.visit_id as visit,
@@ -53,7 +56,7 @@ class ObservationParameters:
             AND q.zero_point_median IS NOT NULL
         """
 
-        client = ConsDbClient("http://consdb-pq.consdb:8080/consdb/")
+        client = ConsDbClient(**kwargs)
         table = client.query(query)
         # outfile = f'catalogs/LSSTcam_exposure_list.csv'
         # table.write(outfile, overwrite=True)

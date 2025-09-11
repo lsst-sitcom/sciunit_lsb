@@ -96,6 +96,7 @@ def ab_mag_to_njy(mags):
     fluxes : `np.ndarray`
         Array of fluxes in nJy
     """
+    mags = np.asarray(mags)  # strips mask, leaves np.nan where masked
     return (mags * u.ABmag).to(u.nJy).value
 
 
