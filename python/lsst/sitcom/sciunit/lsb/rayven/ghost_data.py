@@ -1,12 +1,13 @@
-from astropy import units as u
 from dataclasses import dataclass, field
-from batoid import RayVector
 from typing import List
 
-from scipy.stats import binned_statistic_2d
 import numpy as np
+from astropy import units as u
+from batoid import RayVector
+from scipy.stats import binned_statistic_2d
 
 from .constants import LSSTCamConstants
+
 
 @dataclass
 class Ghost:
@@ -15,49 +16,54 @@ class Ghost:
     x: List[float] = field(default_factory=list)
     y: List[float] = field(default_factory=list)
     flux: List[float] = field(default_factory=list)
-    #star_flux: float
-    
+    # star_flux: float
+
     @property
     def x_size(self):
-        return np.nanmax(self.x)-np.nanmin(self.x)
+        return np.nanmax(self.x) - np.nanmin(self.x)
 
     @property
     def y_size(self):
-        return np.nanmax(self.y)-np.nanmin(self.y)
-        
+        return np.nanmax(self.y) - np.nanmin(self.y)
+
     def bin(self, bins):
-        binned_ghost, _, _, _ = binned_statistic_2d(self.x, self.y, 
-                                                    range=[[LSSTCamConstants.fp_min_x.value, 
-                                                            LSSTCamConstants.fp_max_x.value],
-                                                           [LSSTCamConstants.fp_min_y.value, 
-                                                            LSSTCamConstants.fp_max_y.value]], 
-                                                    values=self.flux, statistic='sum', bins=bins)
+        binned_ghost, _, _, _ = binned_statistic_2d(
+            self.x,
+            self.y,
+            range=[
+                [LSSTCamConstants.fp_min_x.value, LSSTCamConstants.fp_max_x.value],
+                [LSSTCamConstants.fp_min_y.value, LSSTCamConstants.fp_max_y.value],
+            ],
+            values=self.flux,
+            statistic="sum",
+            bins=bins,
+        )
         return np.flipud(binned_ghost.T)
 
+    def calculate_area(self, bins=1000, units="mm"):
 
-    def calculate_area(self, bins=1000, units='mm'):
-        
-        binned_ghost = self.bin(bins = bins)
-        
-        x_binsize, y_binsize = LSSTCamConstants.fp_width/bins, LSSTCamConstants.fp_height/bins
+        binned_ghost = self.bin(bins=bins)
+
+        x_binsize, y_binsize = LSSTCamConstants.fp_width / bins, LSSTCamConstants.fp_height / bins
         bin_area = np.count_nonzero(binned_ghost) * x_binsize * y_binsize
-        
+
         match units:
-            case 'mm':
+            case "mm":
                 self.area = bin_area
-            case 'pixel':
+            case "pixel":
                 self.area = bin_area * LSSTCamConstants.mm_to_pixel**2
-            case 'arcsec':
-                self.area = bin_area * (LSSTCamConstants.mm_to_pixel * LSSTCamConstants.pixel_to_arcsec)**2
-            case 'deg':
-                self.area = (bin_area * (LSSTCamConstants.mm_to_pixel * LSSTCamConstants.pixel_to_arcsec)**2).to(u.deg**2)
-                
-        
-        
+            case "arcsec":
+                self.area = bin_area * (LSSTCamConstants.mm_to_pixel * LSSTCamConstants.pixel_to_arcsec) ** 2
+            case "deg":
+                self.area = (
+                    bin_area * (LSSTCamConstants.mm_to_pixel * LSSTCamConstants.pixel_to_arcsec) ** 2
+                ).to(u.deg**2)
+
+
 @dataclass
 class StarGhostSet:
     ghosts: List[Ghost] = field(default_factory=list)
-    
+
     def __getitem__(self, index):
         """
         Allow indexing by integer (position) or string (ghost name).
@@ -78,7 +84,7 @@ class StarGhostSet:
     @property
     def labels(self):
         return [ghost.name for ghost in self.ghosts]
-        
+
     @property
     def x(self):
         return np.concatenate([ghost.x for ghost in self.ghosts])
@@ -86,7 +92,7 @@ class StarGhostSet:
     @property
     def y(self):
         return np.concatenate([ghost.y for ghost in self.ghosts])
-        
+
     @property
     def flux(self):
         return np.concatenate([ghost.flux for ghost in self.ghosts])
@@ -94,22 +100,27 @@ class StarGhostSet:
     @property
     def total_flux(self):
         return np.sum(self.flux)
-    
+
     def index(self, name):
         return [ghost.name for ghost in self.ghosts].index(name)
 
     def append(self, ghost: Ghost):
         self.ghosts.append(ghost)
-        
+
     def bin(self, bins):
-        binned_ghosts, _, _, _ = binned_statistic_2d(self.x, self.y, 
-                                                    range=[[LSSTCamConstants.fp_min_x.value, 
-                                                            LSSTCamConstants.fp_max_x.value],
-                                                           [LSSTCamConstants.fp_min_y.value, 
-                                                            LSSTCamConstants.fp_max_y.value]], 
-                                                    values=self.flux, statistic='sum', bins=bins)
+        binned_ghosts, _, _, _ = binned_statistic_2d(
+            self.x,
+            self.y,
+            range=[
+                [LSSTCamConstants.fp_min_x.value, LSSTCamConstants.fp_max_x.value],
+                [LSSTCamConstants.fp_min_y.value, LSSTCamConstants.fp_max_y.value],
+            ],
+            values=self.flux,
+            statistic="sum",
+            bins=bins,
+        )
         return np.flipud(binned_ghosts.T)
-    
+
 
 @dataclass
 class FieldGhostSet:
@@ -146,11 +157,15 @@ class FieldGhostSet:
         self.star_ghost_sets.append(star_ghost_set)
 
     def bin(self, bins):
-        binned_ghosts, _, _, _ = binned_statistic_2d(self.x, self.y, 
-                                                    range=[[LSSTCamConstants.fp_min_x.value, 
-                                                            LSSTCamConstants.fp_max_x.value],
-                                                           [LSSTCamConstants.fp_min_y.value, 
-                                                            LSSTCamConstants.fp_max_y.value]], 
-                                                    values=self.flux, statistic='sum', bins=bins)
+        binned_ghosts, _, _, _ = binned_statistic_2d(
+            self.x,
+            self.y,
+            range=[
+                [LSSTCamConstants.fp_min_x.value, LSSTCamConstants.fp_max_x.value],
+                [LSSTCamConstants.fp_min_y.value, LSSTCamConstants.fp_max_y.value],
+            ],
+            values=self.flux,
+            statistic="sum",
+            bins=bins,
+        )
         return np.flipud(binned_ghosts.T)
-    
