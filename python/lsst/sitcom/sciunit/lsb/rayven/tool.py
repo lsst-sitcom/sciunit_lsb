@@ -1,4 +1,6 @@
-from astropy.table import join
+from astropy.table import join, QTable
+import numpy as np
+import astropy.units as u 
 
 # from .ghost_data import Ghost
 from lsst.daf.butler import Butler
@@ -113,7 +115,6 @@ class GhostTool:
                     "instrument": "LSSTCam",
                 },
             )
-
             self.butler = Butler.from_config(
                 butler_dict["repo"],
                 collections=butler_dict["collections"],
@@ -133,11 +134,30 @@ class GhostTool:
     def make_star_table(self, bright_star_catalog, camera_geometry):
 
         if not len(bright_star_catalog.table) == len(camera_geometry.coord_transform_table):
-            raise ValueError(
-                f"Table size mismatch: bright_star_catalog.table has {len(bright_star_catalog.table)} rows, "
-                "camera_geometry.coord_transform_table has {len(camera_geometry.coord_transform_table)} rows."
-            )
-
-        table = join(bright_star_catalog.table, camera_geometry.coord_transform_table, join_type="inner")
+            raise ValueError(f"Table size mismatch: bright_star_catalog.table has {len(bright_star_catalog.table)} rows, camera_geometry.coord_transform_table has {len(camera_geometry.coord_transform_table)} rows.")
+    
+        elif (len(bright_star_catalog.table) == 0 or len(camera_geometry.coord_transform_table) == 0):
+            table = QTable(
+                                names=(
+                                    "ra", "dec", "mag", "flux",
+                                    "px_x", "px_y", "fp_x", "fp_y",
+                                    "fa_x", "fa_y",
+                                    "detector_id", "detector_type"
+                                ),
+                                dtype=(
+                                    np.float64, np.float64, np.float32, np.float64,
+                                    np.float64, np.float64, np.float64, np.float64,
+                                    np.float64, np.float64,
+                                    np.int64, str
+                                ),
+                                units=(
+                                    u.deg, u.deg, u.mag, u.ct,        # RA, Dec, Mag, Flux
+                                    u.pix, u.pix, u.mm, u.mm,         # Pixel + focal plane
+                                    u.rad, u.rad,                     # Field angle
+                                    None, None                        # detector_id, detector_type
+                                )
+                            )
+        else:
+            table = join(bright_star_catalog.table, camera_geometry.coord_transform_table, join_type='inner')
 
         return table
