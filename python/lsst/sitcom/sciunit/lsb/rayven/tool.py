@@ -139,7 +139,6 @@ class GhostTool:
                 f"camera_geometry.coord_transform_table has {len(camera_geometry.coord_transform_table)} "
                 "rows."
             )
-        
         elif len(bright_star_catalog.table) == 0 or len(camera_geometry.coord_transform_table) == 0:
             table = QTable(
                 names=(
@@ -185,8 +184,6 @@ class GhostTool:
                     None,  # detector_type
                 ),
             )
-            
         else:
             table = join(bright_star_catalog.table, camera_geometry.coord_transform_table, join_type='inner')
-
         return table
