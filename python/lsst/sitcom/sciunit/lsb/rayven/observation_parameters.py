@@ -37,7 +37,7 @@ class ObservationParameters:
         except ImportError as e:
             raise ImportError("ConsDbClient requires lsst.summit to be installed.") from e
 
-        os.environ["no_proxy"] += ".slac.stanford.edu" #",.consdb"
+        os.environ["no_proxy"] += ".slac.stanford.edu"
 
         query = """
             SELECT
