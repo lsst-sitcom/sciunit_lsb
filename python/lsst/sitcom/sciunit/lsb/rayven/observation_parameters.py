@@ -37,7 +37,7 @@ class ObservationParameters:
         except ImportError as e:
             raise ImportError("ConsDbClient requires lsst.summit to be installed.") from e
 
-        os.environ["no_proxy"] += ",.consdb"
+        os.environ["no_proxy"] += ".slac.stanford.edu"
 
         query = """
             SELECT
@@ -55,8 +55,10 @@ class ObservationParameters:
             WHERE v.visit_id = q.visit_id
             AND q.zero_point_median IS NOT NULL
         """
+        consdb_url = kwargs.get('url')
+        print(consdb_url)
 
-        client = ConsDbClient(**kwargs)
+        client = ConsDbClient(consdb_url)
         table = client.query(query)
         # outfile = f'catalogs/LSSTcam_exposure_list.csv'
         # table.write(outfile, overwrite=True)
